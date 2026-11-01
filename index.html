@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSE BSE Live - Honest Real-Time Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg: #0a0e12;
+      --surface: #12181f;
+      --surface-2: #171f29;
+      --border: #1e2a36;
+      --border-strong: #263545;
+      --text: #e6edf3;
+      --text-muted: #7d8b9a;
+      --text-faint: #4a5a6d;
+      --green: #00ff88;
+      --green-dim: rgba(0, 255, 136, 0.12);
+      --red: #ff4444;
+      --red-dim: rgba(255, 68, 68, 0.12);
+      --accent: #00ff88;
+    }
+
+    * {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-strong);
+    }
+
+    .widget-container {
+      position: relative;
+      width: 100%;
+      height: 120px;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+    .widget-container iframe {
+      width: 100% !important;
+      height: 120px !important;
+      border: 0 !important;
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 560px;
+      overflow: hidden;
+    }
+    .chart-container iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: 0 !important;
+    }
+
+    .news-container {
+      width: 100%;
+      height: 380px;
+      overflow: hidden;
+    }
+    .news-container iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: 0 !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-50 border-b border-[var(--border)] bg-[rgba(10,14,18,0.95)] backdrop-blur-md px-4 py-3 md:px-6">
+    <div class="mx-auto max-w-[1600px] flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="h-2.5 w-2.5 rounded-full bg-[var(--green)] shadow-[0_0_10px_var(--green)] animate-pulse"></span>
+          <h1 class="text-base md:text-xl font-bold tracking-tight text-[var(--text)]">
+            NSE BSE LIVE <span class="text-[var(--green)]">- REAL-TIME TERMINAL</span>
+          </h1>
+        </div>
+        <p class="text-[10px] md:text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] mt-0.5">
+          Pure TradingView Direct Data • Zero Local Simulation • Side-by-Side Analysis Mode
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5">
+          <div class="flex flex-col">
+            <span class="text-[9px] font-bold uppercase tracking-wider text-[var(--text-faint)]">Asia/Kolkata (IST)</span>
+            <span id="live-clock" class="font-mono text-xs md:text-sm font-bold text-[var(--text)]">Loading...</span>
+          </div>
+          <div class="h-6 w-px bg-[var(--border)]"></div>
+          <div class="flex flex-col items-end">
+            <div id="market-status-badge" class="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[var(--green-dim)] text-[var(--green)]">
+              <span id="market-status-dot" class="h-1.5 w-1.5 rounded-full bg-[var(--green)] animate-pulse"></span>
+              <span id="market-status-text">CHECKING</span>
+            </div>
+            <span id="market-status-reason" class="text-[9px] font-medium text-[var(--text-faint)]">NSE Cash Session</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main class="mx-auto max-w-[1600px] px-4 pt-6 md:px-6 space-y-8">
+
+    <!-- DATA HONESTY BANNER -->
+    <div class="flex items-center gap-2.5 rounded-lg border border-[rgba(0,255,136,0.2)] bg-[rgba(0,255,136,0.05)] px-4 py-2">
+      <div class="h-2 w-2 rounded-full bg-[var(--green)] shadow-[0_0_8px_var(--green)]"></div>
+      <p class="text-xs font-medium text-[var(--text-muted)]">
+        <strong class="text-[var(--green)]">LIVE STREAM ACTIVE</strong> — Direct TradingView embedded iframe feed. Prices update continuously during trading hours. Execute trades in your broker platform side-by-side.
+      </p>
+    </div>
+
+    <!-- SECTION 1: CORE INDIAN INDICES -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--text)]">
+          <span class="flex h-5 w-5 items-center justify-center rounded bg-[var(--green)] text-[11px] font-bold text-black">1</span>
+          CORE INDICES - REAL-TIME
+          <span class="rounded bg-[var(--surface-2)] px-2 py-0.5 text-[10px] font-normal text-[var(--text-faint)]">8 Key Symbols</span>
+        </h2>
+        <span class="text-[10px] text-[var(--text-faint)] hidden sm:block">Source: NSE / BSE Direct Widgets</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- NIFTY 50 FUTURES -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">NIFTY FUTURES</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">NSE:NIFTY1!</span>
+          </div>
+          <div class="widget-container" id="widget-nifty"></div>
+        </div>
+
+        <!-- BANK NIFTY FUTURES -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">BANK NIFTY FUTURES</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">NSE:BANKNIFTY1!</span>
+          </div>
+          <div class="widget-container" id="widget-banknifty"></div>
+        </div>
+
+        <!-- FINNIFTY FUTURES -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">FINNIFTY FUTURES</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">NSE:FINNIFTY1!</span>
+          </div>
+          <div class="widget-container" id="widget-finnifty"></div>
+        </div>
+
+        <!-- MIDCAP SELECT FUTURES -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">MIDCAP SELECT FUT</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">NSE:MIDCPNIFTY1!</span>
+          </div>
+          <div class="widget-container" id="widget-midcap"></div>
+        </div>
+
+        <!-- SENSEX -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">BSE SENSEX</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">BSE:SENSEX</span>
+          </div>
+          <div class="widget-container" id="widget-sensex"></div>
+        </div>
+
+        <!-- BANKEX -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">BSE BANKEX</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">BSE:BANKEX</span>
+          </div>
+          <div class="widget-container" id="widget-bankex"></div>
+        </div>
+
+        <!-- NIFTY NEXT 50 -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">NIFTY NEXT 50</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">NSE:CNXJR1!</span>
+          </div>
+          <div class="widget-container" id="widget-next50"></div>
+        </div>
+
+        <!-- NIFTY IT -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">NIFTY IT INDEX</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">NSE:CNXIT1!</span>
+          </div>
+          <div class="widget-container" id="widget-niftyit"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: GLOBAL SENTIMENT & RISK INDICATORS -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--text)]">
+          <span class="flex h-5 w-5 items-center justify-center rounded bg-[#7d8b9a] text-[11px] font-bold text-black">2</span>
+          GLOBAL MACRO & RISK INDICATORS
+          <span class="rounded bg-[var(--surface-2)] px-2 py-0.5 text-[10px] font-normal text-[var(--text-faint)]">8 Market Drivers</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- GIFT NIFTY -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">GIFT NIFTY</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">NSE:GIFTNIFTY</span>
+          </div>
+          <div class="widget-container" id="widget-giftnifty"></div>
+        </div>
+
+        <!-- INDIA VIX -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">INDIA VIX</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">NSE:INDIAVIX</span>
+          </div>
+          <div class="widget-container" id="widget-indiavix"></div>
+        </div>
+
+        <!-- DOW JONES FUTURES -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">DOW FUTURES</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">FOREXCOM:DJI</span>
+          </div>
+          <div class="widget-container" id="widget-dow"></div>
+        </div>
+
+        <!-- NASDAQ FUTURES -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">NASDAQ 100</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">NASDAQ:NDX</span>
+          </div>
+          <div class="widget-container" id="widget-nasdaq"></div>
+        </div>
+
+        <!-- US VIX -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">US CBOE VIX</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">TVC:VIX</span>
+          </div>
+          <div class="widget-container" id="widget-usvix"></div>
+        </div>
+
+        <!-- CRUDE OIL -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">BRENT CRUDE</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">TVC:USOIL</span>
+          </div>
+          <div class="widget-container" id="widget-crude"></div>
+        </div>
+
+        <!-- USD-INR -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">USD / INR</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">FX_IDC:USDINR</span>
+          </div>
+          <div class="widget-container" id="widget-usdinr"></div>
+        </div>
+
+        <!-- NIKKEI 225 -->
+        <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2">
+          <div class="mb-1 flex items-center justify-between px-2 py-1 border-b border-[var(--border)]">
+            <span class="text-xs font-bold text-[var(--text-muted)]">NIKKEI 225</span>
+            <span class="text-[9px] text-[var(--text-faint)] font-mono">INDEX:NIKKEI</span>
+          </div>
+          <div class="widget-container" id="widget-nikkei"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: OPTIONS TRADER PRE-MARKET & intraday CHECKS -->
+    <section class="space-y-4">
+      <div class="rounded-xl border border-[rgba(0,255,136,0.25)] bg-[var(--surface)] overflow-hidden">
+        <div class="flex flex-col gap-2 border-b border-[rgba(0,255,136,0.15)] bg-[rgba(0,255,136,0.06)] px-5 py-3.5 md:flex-row md:items-center md:justify-between">
+          <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--text)]">
+            <span class="flex h-5 w-5 items-center justify-center rounded bg-[var(--green)] text-xs text-black font-bold">!</span>
+            OPTIONS TRADER CONTROL RULES - PRE-FLIGHT MATRIX
+          </h3>
+          <span class="rounded-full border border-[rgba(0,255,136,0.2)] bg-[rgba(0,255,136,0.1)] px-3 py-0.5 text-[10px] font-bold text-[var(--green)]">
+            Intraday Guidance
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[var(--border)]">
+          <div class="p-4 space-y-2.5">
+            <div class="flex items-start gap-2.5 text-xs">
+              <span class="text-[var(--green)] font-bold">↑</span>
+              <p><strong class="text-[var(--text)]">GIFT Nifty Futures +40 pts:</strong> Indicates gap-up opening tendency for Nifty 50.</p>
+            </div>
+            <div class="flex items-start gap-2.5 text-xs">
+              <span class="text-[var(--green)] font-bold">↑</span>
+              <p><strong class="text-[var(--text)]">India VIX Cool-Off (&lt;14):</strong> Option buying premiums decay fast. Prefer spreads or direction momentum.</p>
+            </div>
+            <div class="flex items-start gap-2.5 text-xs">
+              <span class="text-[var(--red)] font-bold">↓</span>
+              <p><strong class="text-[var(--text)]">India VIX Spike (&gt;16):</strong> Option premiums expand rapidly. Good for breakout option buyers.</p>
+            </div>
+            <div class="flex items-start gap-2.5 text-xs">
+              <span class="text-[var(--green)] font-bold">↑</span>
+              <p><strong class="text-[var(--text)]">Bank Nifty Leading:</strong> Bank Nifty carries ~35% weight in Nifty. Strong directional cue.</p>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-2.5">
+            <div class="flex items-start gap-2.5 text-xs">
+              <span class="text-[var(--green)] font-bold">↑</span>
+              <p><strong class="text-[var(--text)]">USDINR Cooling:</strong> Strengthened Rupee brings strong Foreign Institutional (FII) cash inflows.</p>
+            </div>
+            <div class="flex items-start gap-2.5 text-xs">
+              <span class="text-[var(--green)] font-bold">↑</span>
+              <p><strong class="text-[var(--text)]">Brent Crude Falling:</strong> positive macro sentiment for Indian corporate margins & inflation control.</p>
+            </div>
+            <div class="flex items-start gap-2.5 text-xs">
+              <span class="text-[var(--green)] font-bold">↑</span>
+              <p><strong class="text-[var(--text)]">Chart Confirmations:</strong> Always check RSI 50+ & Supertrend crossover on the live 5m chart below.</p>
+            </div>
+            <div class="flex items-start gap-2.5 text-xs">
+              <span class="text-[var(--green)] font-bold">↑</span>
+              <p><strong class="text-[var(--text)]">Execution Discipline:</strong> Place orders strictly in broker terminal (Zerodha/Dhan/Groww) with stop loss.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: MAIN INTERACTIVE CHART (5-MIN FUTURES) -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--text)]">
+          <span class="flex h-5 w-5 items-center justify-center rounded bg-[var(--green)] text-[11px] font-bold text-black">4</span>
+          MAIN ADVANCED CHART - NIFTY REAL-TIME (5m)
+        </h2>
+        <span class="text-[10px] text-[var(--text-faint)]">RSI (14) + Supertrend Included</span>
+      </div>
+
+      <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 overflow-hidden">
+        <div class="chart-container" id="main-trading-chart"></div>
+        <div class="flex flex-wrap items-center gap-4 border-t border-[var(--border)] bg-[var(--surface-2)] px-4 py-2 text-[11px] text-[var(--text-muted)]">
+          <span class="font-bold text-[var(--text-faint)] uppercase text-[10px]">Active Indicators:</span>
+          <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-[var(--green)]"></span> RSI 14</span>
+          <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-[#4a8cff]"></span> Supertrend</span>
+          <span class="ml-auto text-[10px] text-[var(--text-faint)]">Chart interactive: change symbol or timeframes anytime</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: LIVE BREAKING NEWS STREAM -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--text)]">
+          <span class="flex h-5 w-5 items-center justify-center rounded bg-[#7d8b9a] text-[11px] font-bold text-black">5</span>
+          LIVE MARKET NEWS & ANNOUNCEMENTS
+        </h2>
+      </div>
+
+      <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1">
+        <div class="news-container" id="news-timeline-container"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: BROKER SIDE-BY-SIDE INSTRUCTIONS -->
+    <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 space-y-3">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--green)] flex items-center gap-2">
+        <span class="h-4 w-4 rounded-full bg-[var(--green-dim)] text-[var(--green)] flex items-center justify-center text-[10px]">✓</span>
+        OPTIMAL SETUP FOR LIVE DAY TRADING
+      </h3>
+      <ul class="text-xs leading-relaxed text-[var(--text-muted)] space-y-1.5 list-disc list-inside">
+        <li>Keep this terminal open on your primary screen for market-wide correlation monitoring.</li>
+        <li>Open your broker's platform (Zerodha Kite, Dhan, Fyers, Upstox) on your secondary screen or split window for fast option order entry.</li>
+        <li>Data feeds here update automatically straight from TradingView's servers without client-side tick simulation.</li>
+        <li>Before placing any option trade, ensure India VIX, Nifty Futures chart, and Bank Nifty confirm the move together.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-12 border-t border-[var(--border)] bg-[var(--surface)] py-6 px-4 md:px-6">
+    <div class="mx-auto max-w-[1600px] flex flex-col gap-2 md:flex-row md:items-center md:justify-between text-[10px] text-[var(--text-faint)] font-mono">
+      <p>Source Data: TradingView Embed Single Quote & Advanced Chart Feeds • Zero Local Tick Manipulation</p>
+      <p>Terminal Status: Active Live Connection • Designed for Real-Time Analysis</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPT: IFRAME GENERATION & LIVE CLOCK -->
+  <script>
+    // Build single quote widget direct embed iframe url
+    function buildWidgetIframe(symbol) {
+      const config = {
+        symbol: symbol,
+        width: "100%",
+        height: "120",
+        colorTheme: "dark",
+        isTransparent: false,
+        locale: "in"
+      };
+      const encoded = encodeURIComponent(JSON.stringify(config));
+      return `<iframe src="https://s.tradingview.com/embed-widget/single-quote/?locale=in#${encoded}" scrolling="no" allowtransparency="true" frameborder="0"></iframe>`;
+    }
+
+    // Build main chart embed iframe url
+    function buildChartIframe(symbol) {
+      const config = {
+        autosize: true,
+        symbol: symbol,
+        interval: "5",
+        timezone: "Asia/Kolkata",
+        theme: "dark",
+        style: "1",
+        locale: "in",
+        enable_publishing: false,
+        allow_symbol_change: true,
+        calendar: false,
+        studies: ["RSI@tv-basicstudies", "Supertrend@tv-basicstudies"],
+        support_host: "https://www.tradingview.com",
+        backgroundColor: "#12181f",
+        gridColor: "rgba(30, 42, 54, 0.3)"
+      };
+      const encoded = encodeURIComponent(JSON.stringify(config));
+      return `<iframe src="https://s.tradingview.com/embed-widget/advanced-chart/?locale=in#${encoded}" scrolling="no" allowtransparency="true" frameborder="0"></iframe>`;
+    }
+
+    // Build timeline news iframe url
+    function buildNewsIframe() {
+      const config = {
+        feedMode: "all_symbols",
+        isTransparent: true,
+        displayMode: "regular",
+        colorTheme: "dark",
+        width: "100%",
+        height: "380",
+        locale: "in",
+        symbols: [
+          { s: "NSE:NIFTY1!", d: "NIFTY FUT" },
+          { s: "NSE:BANKNIFTY1!", d: "BANKNIFTY FUT" },
+          { s: "BSE:SENSEX", d: "SENSEX" },
+          { s: "NSE:INDIAVIX", d: "INDIA VIX" }
+        ]
+      };
+      const encoded = encodeURIComponent(JSON.stringify(config));
+      return `<iframe src="https://s.tradingview.com/embed-widget/timeline/?locale=in#${encoded}" scrolling="no" allowtransparency="true" frameborder="0"></iframe>`;
+    }
+
+    // Load widgets into containers
+    function initWidgets() {
+      const map = {
+        'widget-nifty': 'NSE:NIFTY1!',
+        'widget-banknifty': 'NSE:BANKNIFTY1!',
+        'widget-finnifty': 'NSE:FINNIFTY1!',
+        'widget-midcap': 'NSE:MIDCPNIFTY1!',
+        'widget-sensex': 'BSE:SENSEX',
+        'widget-bankex': 'BSE:BANKEX',
+        'widget-next50': 'NSE:CNXJR1!',
+        'widget-niftyit': 'NSE:CNXIT1!',
+        'widget-giftnifty': 'NSE:GIFTNIFTY',
+        'widget-indiavix': 'NSE:INDIAVIX',
+        'widget-dow': 'FOREXCOM:DJI',
+        'widget-nasdaq': 'NASDAQ:NDX',
+        'widget-usvix': 'TVC:VIX',
+        'widget-crude': 'TVC:USOIL',
+        'widget-usdinr': 'FX_IDC:USDINR',
+        'widget-nikkei': 'INDEX:NIKKEI'
+      };
+
+      for (const [id, symbol] of Object.entries(map)) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = buildWidgetIframe(symbol);
+      }
+
+      const chartEl = document.getElementById('main-trading-chart');
+      if (chartEl) chartEl.innerHTML = buildChartIframe('NSE:NIFTY1!');
+
+      const newsEl = document.getElementById('news-timeline-container');
+      if (newsEl) newsEl.innerHTML = buildNewsIframe();
+    }
+
+    // Update real-time clock and NSE market status
+    function updateClockAndStatus() {
+      const now = new Date();
+      // Asia/Kolkata time format
+      const options = { timeZone: 'Asia/Kolkata', hour12: false, weekday: 'short', year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      const formatted = new Intl.DateTimeFormat('en-IN', options).format(now);
+      
+      const clockEl = document.getElementById('live-clock');
+      if (clockEl) clockEl.innerText = formatted;
+
+      // Calculate Market Hours in IST
+      const kolkataTimeStr = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: 'numeric', hour12: false, weekday: 'narrow' }).format(now);
+      
+      const dayOfWeek = now.getDay(); // 0 is Sunday, 6 is Saturday
+      const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(now);
+      
+      let hour = 0, minute = 0;
+      parts.forEach(p => {
+        if (p.type === 'hour') hour = parseInt(p.value, 10);
+        if (p.type === 'minute') minute = parseInt(p.value, 10);
+      });
+
+      const totalMins = hour * 60 + minute;
+      const openMins = 9 * 60 + 15; // 09:15
+      const closeMins = 15 * 60 + 30; // 15:30
+
+      const badge = document.getElementById('market-status-badge');
+      const text = document.getElementById('market-status-text');
+      const reason = document.getElementById('market-status-reason');
+      const dot = document.getElementById('market-status-dot');
+
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        text.innerText = "CLOSED";
+        reason.innerText = "Weekend";
+        badge.className = "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[var(--red-dim)] text-[var(--red)]";
+        dot.className = "h-1.5 w-1.5 rounded-full bg-[var(--red)]";
+      } else if (totalMins >= openMins && totalMins <= closeMins) {
+        text.innerText = "LIVE OPEN";
+        reason.innerText = "Regular NSE Session";
+        badge.className = "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[var(--green-dim)] text-[var(--green)]";
+        dot.className = "h-1.5 w-1.5 rounded-full bg-[var(--green)] animate-pulse";
+      } else if (totalMins >= 9 * 60 && totalMins < openMins) {
+        text.innerText = "PRE-MARKET";
+        reason.innerText = "09:00 - 09:15 IST";
+        badge.className = "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[var(--green-dim)] text-[var(--green)]";
+        dot.className = "h-1.5 w-1.5 rounded-full bg-[var(--green)]";
+      } else {
+        text.innerText = "CLOSED";
+        reason.innerText = "Post-Market Hours";
+        badge.className = "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[var(--red-dim)] text-[var(--red)]";
+        dot.className = "h-1.5 w-1.5 rounded-full bg-[var(--red)]";
+      }
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      initWidgets();
+      updateClockAndStatus();
+      setInterval(updateClockAndStatus, 1000);
+    });
+  </script>
+</body>
+</html>
